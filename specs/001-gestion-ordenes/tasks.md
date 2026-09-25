@@ -21,10 +21,10 @@ Ejecutar en orden. Al terminar cada fase: compilar, correr pruebas, marcar `[x]`
 - [x] T12 Pruebas unitarias de los servicios con Mockito (puerto de salida simulado): creación, idempotencia (llave repetida y carrera), consulta inexistente, cambio de estado delegando al puerto, listado con validación de fechas.
 
 ## Fase 3: Adaptador Oracle
-- [ ] T13 Entidades JPA y `OrdenJpaRepository`.
-- [ ] T14 `OrdenRepositorioOracle`: crear (orden + histórico), buscar por id y por llave, listar con filtros y paginación, existencia de cliente/tipo, id de estado por código.
-- [ ] T15 Llamada a `prc_cambio_estado_orden` con `SimpleJdbcCall` y traductor de errores ORA-20001..20004 a excepciones de dominio.
-- [ ] T16 Prueba unitaria del traductor de errores (cada código a su excepción).
+- [x] T13 Entidades JPA y `OrdenJpaRepository`.
+- [x] T14 `OrdenRepositorioOracle`: crear (orden + histórico), buscar por id y por llave, listar con filtros y paginación, existencia de cliente/tipo, id de estado por código.
+- [x] T15 Llamada a `prc_cambio_estado_orden` con `SimpleJdbcCall` y traductor de errores ORA-20001..20004 a excepciones de dominio.
+- [x] T16 Prueba unitaria del traductor de errores (cada código a su excepción).
 
 ## Fase 4: Adaptador REST
 - [ ] T17 Controller que implementa la interfaz generada y mappers DTO <-> dominio.
