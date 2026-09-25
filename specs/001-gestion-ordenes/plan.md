@@ -45,6 +45,9 @@ Reglas:
 - Opciones: `interfaceOnly=true`, `useSpringBoot3=true` (o la opción equivalente para la versión elegida), `useBeanValidation=true`, `useTags=true`, `openApiNullable=false`, `skipDefaultInterface=true`.
 - El código generado va a `target/generated-sources` y no se sube al repositorio.
 - Como el `servers.url` incluye `/api/v1`, configurar `server.servlet.context-path` o el prefijo de rutas para que las rutas finales sean `/api/v1/orden...`.
+  - Decisión: prefijo de rutas (`WebConfig.configurePathMatch`) solo para el paquete del adaptador REST, para que Swagger UI quede en `/swagger-ui.html`.
+- Versiones fijadas: Spring Boot 4.1.1, springdoc 3.1.1 (construido sobre Boot 4.1), openapi-generator 7.25.0 con `useSpringBoot4=true` y `useJackson3=true` (reemplazan a `useSpringBoot3`).
+- Los modelos generados llevan sufijo `Dto` (`OrdenDto`, `ErrorDto`...) para no chocar con `java.lang.Error` ni con el modelo de dominio.
 
 ## Casos de uso
 
@@ -54,13 +57,16 @@ Reglas:
 3. Obtener el id del estado `CREADA` por código.
 4. Insertar ORDEN e insertar ORDEN_HISTORICO (estado anterior nulo) en la misma transacción.
 5. Si al insertar se viola la UNIQUE de la llave (carrera entre dos peticiones iguales), capturar la violación, releer por la llave y retornar la existente (-> 200). Para esto, el insert debe hacer flush dentro del adaptador para detectar la violación ahí.
+   - El adaptador inserta con `EntityManager.persist` + `EntityManager.flush()` directos, NO con `save()` de Spring Data: `save()` es `@Transactional` y, al fallar dentro de la transacción del caso de uso, la marca *rollback-only* y el commit terminaría en `UnexpectedRollbackException`.
+   - Oracle revierte solo la sentencia fallida (rollback a nivel de sentencia), así que la transacción sigue usable. Tras la violación se hace `EntityManager.clear()` (la entidad fallida queda en un estado inconsistente) y se relee por la llave; con READ COMMITTED la relectura ve la orden ya confirmada por la otra petición.
+   - La violación se reconoce por el nombre de la restricción `UK_ORDEN_LLAVE_IDEMPOTENCIA` (ORA-00001); cualquier otra violación se propaga.
 6. Retornar 201 con la orden.
 
 ### CambiarEstadoOrden
 1. Llamar a `prc_cambio_estado_orden` con: id orden, id estado nuevo, usuario (del token), observación, id de petición.
 2. El adaptador traduce `SQLException.getErrorCode()` (buscando en la cadena de causas de la `DataAccessException`): 20001 -> DatosInvalidos, 20002 -> OrdenNoEncontrada, 20003 -> TransicionInvalida, 20004 -> OrdenBloqueada.
 3. Releer la orden y retornarla.
-4. La regla de transición NO se valida en Java.
+4. La regla de transición NO se valida en Java. Un estado inexistente llega como -20003 y responde 422 (CA-03.3.1).
 
 ### ConsultarOrden
 `@Transactional(readOnly = true)`. No existe -> OrdenNoEncontradaException.

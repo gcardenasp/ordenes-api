@@ -42,6 +42,10 @@ paths:
           $ref: '#/components/responses/SolicitudInvalida'
         '401':
           $ref: '#/components/responses/NoAutorizado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 
     get:
       tags: [Orden]
@@ -97,6 +101,10 @@ paths:
           $ref: '#/components/responses/SolicitudInvalida'
         '401':
           $ref: '#/components/responses/NoAutorizado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 
   /orden/{id}:
     get:
@@ -112,10 +120,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Orden'
+        '400':
+          $ref: '#/components/responses/SolicitudInvalida'
         '401':
           $ref: '#/components/responses/NoAutorizado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
         '404':
           $ref: '#/components/responses/NoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 
   /orden/{id}/estado:
     put:
@@ -142,6 +156,8 @@ paths:
           $ref: '#/components/responses/SolicitudInvalida'
         '401':
           $ref: '#/components/responses/NoAutorizado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
         '404':
           $ref: '#/components/responses/NoEncontrada'
         '409':
@@ -156,6 +172,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 
 components:
   securitySchemes:
@@ -277,6 +295,18 @@ components:
             $ref: '#/components/schemas/Error'
     NoAutorizado:
       description: Token ausente o inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Prohibido:
+      description: El token no tiene el permiso requerido para la acción
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ErrorInterno:
+      description: Error inesperado; el detalle solo queda en el log
       content:
         application/json:
           schema:

@@ -26,6 +26,7 @@ Como consumidor API quiero crear una orden para un cliente con un tipo de orden.
 
 - CA-02.1 Si existe: 200 con la orden.
 - CA-02.2 Si no existe: 404.
+- CA-02.3 Si el id no es numérico: 400.
 
 ### HU-03 Actualizar estado (`PUT /api/v1/orden/{id}/estado`)
 
@@ -38,7 +39,8 @@ Como consumidor API quiero cambiar el estado de una orden respetando las transic
   - -20002 la orden no existe: 404
   - -20003 transición no permitida: 422
   - -20004 la orden está bloqueada por otra solicitud (espera agotada): 409
-- CA-03.4 Concurrencia: si dos solicitudes cambian la misma orden al mismo tiempo, la segunda espera (máximo 5 s), luego valida contra el estado ya actualizado. Nunca quedan dos registros del histórico que salgan del mismo estado anterior.
+- CA-03.3.1 Un `idEstadoNuevo` que no existe se trata como transición no permitida: 422 (el procedimiento no encuentra una transición hacia él).
+- CA-03.4 Concurrencia: si dos solicitudes cambian la misma orden al mismo tiempo, la segunda espera (máximo 5 s), luego valida contra el estado ya actualizado. Dos solicitudes concurrentes nunca registran en el histórico dos cambios que partan del mismo estado anterior; la segunda parte del estado que dejó la primera o es rechazada. Un mismo estado anterior sí puede repetirse en el histórico en cambios sucesivos legítimos (p. ej. SUSPENDIDA -> EN_PROCESO -> SUSPENDIDA -> EN_PROCESO).
 - CA-03.5 Ante cualquier error, no queda ningún cambio parcial (ni en `ORDEN` ni en `ORDEN_HISTORICO`).
 
 ### HU-04 Listar órdenes (`GET /api/v1/orden?estado=&fechaInicio=&fechaFin=&pagina=&tamano=`)
