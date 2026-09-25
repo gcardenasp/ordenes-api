@@ -1,0 +1,289 @@
+openapi: 3.0.3
+info:
+  title: API de Gestión de Órdenes
+  description: API REST para la gestión de órdenes operativas.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local
+
+security:
+  - bearerAuth: []
+
+paths:
+  /orden:
+    post:
+      tags: [Orden]
+      summary: Crear orden
+      operationId: crearOrden
+      parameters:
+        - $ref: '#/components/parameters/IdPeticion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrearOrdenRequest'
+      responses:
+        '201':
+          description: Orden creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Orden'
+        '200':
+          description: La llave de idempotencia ya existía, se retorna la orden creada previamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Orden'
+        '400':
+          $ref: '#/components/responses/SolicitudInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+
+    get:
+      tags: [Orden]
+      summary: Listar órdenes con paginación y filtros
+      operationId: listarOrdenes
+      parameters:
+        - name: estado
+          in: query
+          required: false
+          description: Id del estado de la orden
+          schema:
+            type: integer
+            format: int64
+        - name: fechaInicio
+          in: query
+          required: false
+          description: Fecha inicial de creación (inclusive)
+          schema:
+            type: string
+            format: date
+        - name: fechaFin
+          in: query
+          required: false
+          description: Fecha final de creación (inclusive)
+          schema:
+            type: string
+            format: date
+        - name: pagina
+          in: query
+          required: false
+          description: Número de página, inicia en 0
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: tamano
+          in: query
+          required: false
+          description: Cantidad de registros por página
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Página de órdenes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaOrden'
+        '400':
+          $ref: '#/components/responses/SolicitudInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+
+  /orden/{id}:
+    get:
+      tags: [Orden]
+      summary: Consultar orden
+      operationId: consultarOrden
+      parameters:
+        - $ref: '#/components/parameters/IdOrden'
+      responses:
+        '200':
+          description: Orden encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Orden'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+        '404':
+          $ref: '#/components/responses/NoEncontrada'
+
+  /orden/{id}/estado:
+    put:
+      tags: [Orden]
+      summary: Actualizar estado de la orden
+      operationId: actualizarEstado
+      parameters:
+        - $ref: '#/components/parameters/IdOrden'
+        - $ref: '#/components/parameters/IdPeticion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActualizarEstadoRequest'
+      responses:
+        '200':
+          description: Estado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Orden'
+        '400':
+          $ref: '#/components/responses/SolicitudInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+        '404':
+          $ref: '#/components/responses/NoEncontrada'
+        '409':
+          description: La orden está siendo actualizada por otra solicitud (-20004)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Transición de estado no permitida (-20003)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdOrden:
+      name: id
+      in: path
+      required: true
+      description: Id de la orden
+      schema:
+        type: integer
+        format: int64
+    IdPeticion:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      description: Id de petición para trazabilidad; si no llega, el servicio lo genera
+      schema:
+        type: string
+
+  schemas:
+    CrearOrdenRequest:
+      type: object
+      required: [idCliente, idTipo, canal, llaveIdempotencia]
+      properties:
+        idCliente:
+          type: integer
+          format: int64
+        idTipo:
+          type: integer
+          format: int64
+        canal:
+          type: string
+          maxLength: 30
+        llaveIdempotencia:
+          type: string
+          maxLength: 100
+
+    ActualizarEstadoRequest:
+      type: object
+      required: [idEstadoNuevo]
+      properties:
+        idEstadoNuevo:
+          type: integer
+          format: int64
+        observacion:
+          type: string
+          maxLength: 500
+
+    Orden:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        idCliente:
+          type: integer
+          format: int64
+        idTipo:
+          type: integer
+          format: int64
+        idEstado:
+          type: integer
+          format: int64
+        canal:
+          type: string
+        llaveIdempotencia:
+          type: string
+        usuarioCreacion:
+          type: string
+        fechaCreacion:
+          type: string
+          format: date-time
+        usuarioModificacion:
+          type: string
+        fechaModificacion:
+          type: string
+          format: date-time
+
+    PaginaOrden:
+      type: object
+      properties:
+        contenido:
+          type: array
+          items:
+            $ref: '#/components/schemas/Orden'
+        pagina:
+          type: integer
+        tamano:
+          type: integer
+        totalElementos:
+          type: integer
+          format: int64
+        totalPaginas:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: string
+        mensaje:
+          type: string
+        fecha:
+          type: string
+          format: date-time
+
+  responses:
+    SolicitudInvalida:
+      description: Datos de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoAutorizado:
+      description: Token ausente o inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoEncontrada:
+      description: La orden no existe (-20002)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

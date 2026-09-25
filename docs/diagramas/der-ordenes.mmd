@@ -1,0 +1,63 @@
+erDiagram
+    CLIENTE {
+        NUMBER id PK
+        VARCHAR2 tipo_identificacion UK "UK compuesta con numero_identificacion"
+        VARCHAR2 numero_identificacion UK
+        VARCHAR2 nombre "Nulo si es empresa"
+        VARCHAR2 apellido "Nulo si es empresa"
+        VARCHAR2 razon_social "Nulo si es persona"
+        VARCHAR2 usuario_creacion
+        TIMESTAMP fecha_creacion
+        VARCHAR2 usuario_modificacion
+        TIMESTAMP fecha_modificacion
+    }
+
+    TIPO_ORDEN {
+        NUMBER id PK
+        VARCHAR2 codigo UK
+        VARCHAR2 nombre
+    }
+
+    ESTADO_ORDEN {
+        NUMBER id PK
+        VARCHAR2 codigo UK
+        VARCHAR2 nombre
+    }
+
+    TRANSICION_ESTADO {
+        NUMBER id_estado_origen PK, FK
+        NUMBER id_estado_destino PK, FK
+    }
+
+    ORDEN {
+        NUMBER id PK
+        NUMBER id_cliente FK "IDX"
+        NUMBER id_tipo FK
+        NUMBER id_estado FK "IDX compuesto con fecha_creacion"
+        VARCHAR2 canal
+        VARCHAR2 llave_idempotencia UK
+        VARCHAR2 usuario_creacion
+        TIMESTAMP fecha_creacion "Particion mensual"
+        VARCHAR2 usuario_modificacion
+        TIMESTAMP fecha_modificacion
+    }
+
+    ORDEN_HISTORICO {
+        NUMBER id PK
+        NUMBER id_orden FK "IDX compuesto con fecha"
+        NUMBER id_estado_anterior FK "Nulo en la creacion"
+        NUMBER id_estado_nuevo FK
+        TIMESTAMP fecha "Particion mensual"
+        VARCHAR2 usuario
+        VARCHAR2 observacion
+        VARCHAR2 id_peticion
+    }
+
+    CLIENTE ||--o{ ORDEN : "tiene"
+    TIPO_ORDEN ||--o{ ORDEN : "clasifica"
+    ESTADO_ORDEN ||--o{ ORDEN : "estado actual"
+    ORDEN ||--o{ ORDEN_HISTORICO : "registra cambios"
+    ESTADO_ORDEN |o--o{ ORDEN_HISTORICO : "estado anterior"
+    ESTADO_ORDEN ||--o{ ORDEN_HISTORICO : "estado nuevo"
+    ESTADO_ORDEN ||--o{ TRANSICION_ESTADO : "origen"
+    ESTADO_ORDEN ||--o{ TRANSICION_ESTADO : "destino"

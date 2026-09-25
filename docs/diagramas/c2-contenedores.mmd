@@ -1,0 +1,16 @@
+C4Container
+title Contenedores - Sistema de Gestión de Órdenes
+
+Person(consumidor, "Consumidor API", "Aplicación o usuario que gestiona órdenes")
+System_Ext(gateway, "API Gateway corporativo", "Autenticación, autorización y rate limiting")
+
+System_Boundary(sgo, "Sistema de Gestión de Órdenes") {
+  Container(api, "Servicio de Órdenes", "Java / Spring Boot", "Expone la API REST y ejecuta los casos de uso")
+  ContainerDb(db, "Base de datos de órdenes", "Oracle", "CLIENTE, ORDEN, ORDEN_HISTORICO y procedimiento PL/SQL de cambio de estado")
+}
+
+Rel(consumidor, gateway, "Envía peticiones", "HTTPS/JSON")
+Rel(gateway, api, "Enruta peticiones autenticadas", "HTTPS/JSON")
+Rel(api, db, "Lee, escribe e invoca el procedimiento", "JDBC")
+
+UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")

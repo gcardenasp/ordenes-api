@@ -1,0 +1,22 @@
+C4Component
+title Componentes - Servicio de Órdenes (arquitectura hexagonal)
+
+System_Ext(gateway, "API Gateway corporativo", "Autenticación y rate limiting")
+ContainerDb(db, "Base de datos de órdenes", "Oracle", "Tablas y procedimiento PL/SQL")
+
+Container_Boundary(api, "Servicio de Órdenes") {
+  Component(rest, "Adaptador REST", "Spring MVC", "Controllers, DTOs con validaciones y manejo global de excepciones")
+  Component(pin, "Puertos de entrada", "Interfaces Java", "Contratos de los casos de uso")
+  Component(uc, "Casos de uso y dominio", "Java", "CrearOrden, ConsultarOrden, CambiarEstadoOrden, ListarOrdenes")
+  Component(pout, "Puerto de persistencia", "Interfaz Java", "Contrato de acceso a datos")
+  Component(ora, "Adaptador Oracle", "Spring Data JPA / JDBC", "Consultas con JPA e invocación del procedimiento de cambio de estado")
+}
+
+Rel(gateway, rest, "Peticiones", "HTTPS/JSON")
+Rel(rest, pin, "Invoca")
+Rel(pin, uc, "Implementado por")
+Rel(uc, pout, "Usa")
+Rel(ora, pout, "Implementa")
+Rel(ora, db, "Lee, escribe y llama al procedimiento", "JDBC")
+
+UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
