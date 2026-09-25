@@ -98,7 +98,7 @@ Reglas:
 
 ## Manejo global de excepciones
 
-`@RestControllerAdvice` que devuelve el esquema `Error` (`codigo`, `mensaje`, `fecha`):
+`@RestControllerAdvice` que devuelve el esquema `Error` (`codigo`, `mensaje`, `fecha`). Los mensajes de validación salen en español (locale fijo `es`):
 
 | Excepción | HTTP | codigo |
 |---|---|---|
@@ -110,6 +110,8 @@ Reglas:
 | OrdenNoEncontradaException | 404 | ORDEN_NO_ENCONTRADA |
 | OrdenBloqueadaException | 409 | ORDEN_BLOQUEADA |
 | TransicionInvalidaException | 422 | TRANSICION_INVALIDA |
+| Ruta inexistente (Spring MVC) | 404 | RECURSO_NO_ENCONTRADO |
+| Método, Content-Type o Accept no soportados (Spring MVC) | 405 / 415 / 406 | SOLICITUD_NO_SOPORTADA |
 | Cualquier otra | 500 | ERROR_INTERNO (mensaje genérico, el detalle solo al log) |
 
 ## Configuración
