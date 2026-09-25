@@ -15,10 +15,10 @@ Ejecutar en orden. Al terminar cada fase: compilar, correr pruebas, marcar `[x]`
 - [x] T08 `.gitignore` (target, IDE, .env). `.env.example` con las variables sin valores reales.
 
 ## Fase 2: Dominio y aplicación
-- [ ] T09 Modelo de dominio y excepciones de dominio.
-- [ ] T10 Puertos de entrada (casos de uso + comandos) y puerto de salida `OrdenRepositorio`.
-- [ ] T11 Servicios de aplicación con `@Transactional` / `readOnly`.
-- [ ] T12 Pruebas unitarias de los servicios con Mockito (puerto de salida simulado): creación, idempotencia (llave repetida y carrera), consulta inexistente, cambio de estado delegando al puerto, listado con validación de fechas.
+- [x] T09 Modelo de dominio y excepciones de dominio.
+- [x] T10 Puertos de entrada (casos de uso + comandos) y puerto de salida `OrdenRepositorio`.
+- [x] T11 Servicios de aplicación con `@Transactional` / `readOnly`.
+- [x] T12 Pruebas unitarias de los servicios con Mockito (puerto de salida simulado): creación, idempotencia (llave repetida y carrera), consulta inexistente, cambio de estado delegando al puerto, listado con validación de fechas.
 
 ## Fase 3: Adaptador Oracle
 - [ ] T13 Entidades JPA y `OrdenJpaRepository`.

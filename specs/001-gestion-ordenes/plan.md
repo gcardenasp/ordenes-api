@@ -18,9 +18,10 @@ Paquete raíz: `com.empresa.ordenes`
 
 ```
 domain/
-  model/          Orden, EstadoOrden (código), Pagina<T>, FiltroOrdenes (records o clases puras)
+  model/          Orden, NuevaOrden, EstadoOrden (código), Pagina<T>, FiltroOrdenes (records o clases puras)
   exception/      OrdenNoEncontradaException, TransicionInvalidaException,
-                  OrdenBloqueadaException, DatosInvalidosException, ReferenciaInexistenteException
+                  OrdenBloqueadaException, DatosInvalidosException, ReferenciaInexistenteException,
+                  LlaveIdempotenciaDuplicadaException (señal interna de la carrera; nunca llega al cliente)
 application/
   port/in/        CrearOrdenUseCase, ConsultarOrdenUseCase, CambiarEstadoOrdenUseCase, ListarOrdenesUseCase
                   (con sus comandos de entrada, p. ej. CrearOrdenCommand)
