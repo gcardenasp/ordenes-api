@@ -1,2 +1,19 @@
 CLAUDE.local.md
+
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+
+# Variables de entorno con valores reales
 .env
+
+# Configuración local de Claude Code
+.claude/settings.local.json

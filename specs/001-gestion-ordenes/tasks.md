@@ -9,10 +9,10 @@ Ejecutar en orden. Al terminar cada fase: compilar, correr pruebas, marcar `[x]`
 - [x] T04 Levantar el contenedor y verificar: tablas creadas, particiones activas, procedimiento compilado sin errores (`USER_ERRORS` vacío), catálogos cargados.
 
 ## Fase 1: Proyecto y contrato
-- [ ] T05 Crear proyecto Maven Spring Boot (Java 21) con las dependencias del plan. Verificar y fijar versiones compatibles.
-- [ ] T06 Agregar al contrato las respuestas 403 y 500 (aprobado por el usuario). Configurar `openapi-generator-maven-plugin` con el contrato y confirmar que genera interfaces y DTOs.
-- [ ] T07 Crear la estructura de paquetes hexagonal vacía y `application.yml` con variables de entorno y perfil `local`.
-- [ ] T08 `.gitignore` (target, IDE, .env). `.env.example` con las variables sin valores reales.
+- [x] T05 Crear proyecto Maven Spring Boot (Java 21) con las dependencias del plan. Verificar y fijar versiones compatibles.
+- [x] T06 Agregar al contrato las respuestas 403 y 500 (aprobado por el usuario). Configurar `openapi-generator-maven-plugin` con el contrato y confirmar que genera interfaces y DTOs.
+- [x] T07 Crear la estructura de paquetes hexagonal vacía y `application.yml` con variables de entorno y perfil `local`.
+- [x] T08 `.gitignore` (target, IDE, .env). `.env.example` con las variables sin valores reales.
 
 ## Fase 2: Dominio y aplicación
 - [ ] T09 Modelo de dominio y excepciones de dominio.

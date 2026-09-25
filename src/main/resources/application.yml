@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: ordenes-api
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      # El driver de Oracle trae 10 filas por viaje a la base; una página puede tener hasta 100
+      hibernate.jdbc.fetch_size: 100
+
+seguridad:
+  jwt:
+    secreto: ${JWT_SECRET}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
