@@ -11,12 +11,14 @@ import com.empresa.ordenes.domain.exception.OrdenNoEncontradaException;
 import com.empresa.ordenes.domain.exception.TransicionInvalidaException;
 import com.empresa.ordenes.domain.model.FiltroOrdenes;
 import com.empresa.ordenes.domain.model.Orden;
+import com.empresa.ordenes.infrastructure.adapter.in.rest.UsuarioActualProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -49,6 +51,10 @@ class OrdenRepositorioOracleIT {
     private JdbcClient jdbc;
     @Autowired
     private DataSource dataSource;
+
+    // La prueba entra por los casos de uso, no por HTTP: el usuario viaja en el comando
+    @MockitoBean
+    private UsuarioActualProvider usuarioActual;
 
     @AfterEach
     void limpiar() {

@@ -12,6 +12,10 @@ spring:
     properties:
       # El driver de Oracle trae 10 filas por viaje a la base; una página puede tener hasta 100
       hibernate.jdbc.fetch_size: 100
+  web:
+    # Mensajes de validación siempre en español, sin importar el Accept-Language del cliente
+    locale: es
+    locale-resolver: fixed
 
 seguridad:
   jwt:

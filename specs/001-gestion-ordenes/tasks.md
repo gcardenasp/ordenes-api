@@ -27,9 +27,9 @@ Ejecutar en orden. Al terminar cada fase: compilar, correr pruebas, marcar `[x]`
 - [x] T16 Prueba unitaria del traductor de errores (cada código a su excepción).
 
 ## Fase 4: Adaptador REST
-- [ ] T17 Controller que implementa la interfaz generada y mappers DTO <-> dominio.
-- [ ] T18 `GlobalExceptionHandler` según la tabla del plan.
-- [ ] T19 Pruebas `@WebMvcTest` de los cuatro endpoints: casos felices y cada error (400, 404, 409, 422), incluido 200 por idempotencia.
+- [x] T17 Controller que implementa la interfaz generada y mappers DTO <-> dominio.
+- [x] T18 `GlobalExceptionHandler` según la tabla del plan.
+- [x] T19 Pruebas `@WebMvcTest` de los cuatro endpoints: casos felices y cada error (400, 404, 409, 422), incluido 200 por idempotencia.
 
 ## Fase 5: Seguridad y trazabilidad
 - [ ] T20 `SecurityConfig` (JWT HS256, permisos por endpoint) y perfil `local` sin seguridad.
