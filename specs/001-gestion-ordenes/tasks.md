@@ -3,14 +3,14 @@
 Ejecutar en orden. Al terminar cada fase: compilar, correr pruebas, marcar `[x]`, resumir, hacer commit y esperar revisión.
 
 ## Fase 0: Base de datos
-- [ ] T01 Crear `database/01_tablas.sql` según `data-model.md` (tablas, PK, FK, UK, CHECK, particiones, índices).
-- [ ] T02 Crear `database/02_datos_catalogo.sql` (estados, transiciones por código, tipos, clientes de prueba, COMMIT).
-- [ ] T03 Crear `docker-compose.yml` con Oracle Free y ejecución automática de los tres scripts en el esquema de la aplicación.
-- [ ] T04 Levantar el contenedor y verificar: tablas creadas, particiones activas, procedimiento compilado sin errores (`USER_ERRORS` vacío), catálogos cargados.
+- [x] T01 Crear `database/01_tablas.sql` según `data-model.md` (tablas, PK, FK, UK, CHECK, particiones, índices).
+- [x] T02 Crear `database/02_datos_catalogo.sql` (estados, transiciones por código, tipos, clientes de prueba, COMMIT).
+- [x] T03 Crear `docker-compose.yml` con Oracle Free y ejecución automática de los tres scripts en el esquema de la aplicación.
+- [x] T04 Levantar el contenedor y verificar: tablas creadas, particiones activas, procedimiento compilado sin errores (`USER_ERRORS` vacío), catálogos cargados.
 
 ## Fase 1: Proyecto y contrato
 - [ ] T05 Crear proyecto Maven Spring Boot (Java 21) con las dependencias del plan. Verificar y fijar versiones compatibles.
-- [ ] T06 Configurar `openapi-generator-maven-plugin` con el contrato y confirmar que genera interfaces y DTOs.
+- [ ] T06 Agregar al contrato las respuestas 403 y 500 (aprobado por el usuario). Configurar `openapi-generator-maven-plugin` con el contrato y confirmar que genera interfaces y DTOs.
 - [ ] T07 Crear la estructura de paquetes hexagonal vacía y `application.yml` con variables de entorno y perfil `local`.
 - [ ] T08 `.gitignore` (target, IDE, .env). `.env.example` con las variables sin valores reales.
 

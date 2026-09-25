@@ -107,6 +107,7 @@ Reglas:
 - `application.yml` con placeholders: `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`.
 - `spring.jpa.hibernate.ddl-auto=validate` (el esquema lo crean los scripts, nunca Hibernate).
 - `spring.jpa.open-in-view=false`.
+- Zona horaria `America/Bogota` para convertir `TIMESTAMP` <-> `OffsetDateTime` y para interpretar `fechaInicio`/`fechaFin` (ver `data-model.md`).
 
 ## Entorno local
 
