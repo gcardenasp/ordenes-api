@@ -21,6 +21,12 @@ seguridad:
   jwt:
     secreto: ${JWT_SECRET}
 
+logging:
+  structured:
+    format:
+      # JSON con fecha, nivel, mensaje, los campos del MDC (idPeticion, idOrden, canal) y los key-value del log
+      console: ecs
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

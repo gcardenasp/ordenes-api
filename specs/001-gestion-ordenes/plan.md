@@ -88,10 +88,17 @@ Reglas:
 - Perfil por defecto: Resource Server JWT con clave simétrica HS256 leída de la variable `JWT_SECRET`. El usuario sale del claim `sub`. Los permisos vienen en el claim `scope` (`ordenes:crear ordenes:leer ordenes:actualizar-estado`) y se validan por endpoint.
 - Perfil `local`: seguridad deshabilitada y usuario fijo `usuario.local`, para probar sin token. Documentarlo en el README.
 - Obtener el usuario mediante un componente del adaptador (p. ej. `UsuarioActualProvider`) y pasarlo al caso de uso dentro del comando. El dominio no conoce Spring Security.
+- `JWT_SECRET` se usa como texto UTF-8 y debe tener al menos 32 bytes; si no, la aplicación no arranca.
+- Además de firma y vigencia, el token debe traer `sub`; sin él responde 401.
+- Swagger UI (`/swagger-ui.html`, `/swagger-ui/**`) y `/v3/api-docs/**` son públicos para que la documentación cargue en el navegador.
+- Los 401 y 403 los responde `RespuestaErrorSeguridad` con el esquema `Error` y el header `WWW-Authenticate`.
 
 ## Logging y trazabilidad
 
 - `CorrelationIdFilter`: toma `X-Correlation-Id` o genera un UUID, lo pone en el MDC (`idPeticion`), lo devuelve en el header de respuesta y lo limpia al final.
+  - Es el primer filtro (antes que la seguridad), así los 401/403 también llevan el header y quedan en el log.
+  - Solo acepta `[A-Za-z0-9._-]{1,100}` (cabe en `ORDEN_HISTORICO.ID_PETICION` y evita inyectar texto en los logs); si no cumple, genera un UUID.
+  - El controller agrega `idOrden` y `canal` al MDC; el filtro los incluye en el log de fin de petición y los limpia.
 - Logs estructurados JSON nativos de Spring Boot (`logging.structured.format.console=ecs` o `logstash`).
 - Un log por petición al terminar con: método, endpoint, estado HTTP, duración en ms, idPeticion; y cuando aplique idOrden y canal.
 - Nunca registrar nombre, apellido, razón social ni identificación del cliente.

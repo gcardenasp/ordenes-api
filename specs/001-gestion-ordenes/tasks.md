@@ -32,10 +32,10 @@ Ejecutar en orden. Al terminar cada fase: compilar, correr pruebas, marcar `[x]`
 - [x] T19 Pruebas `@WebMvcTest` de los cuatro endpoints: casos felices y cada error (400, 404, 409, 422), incluido 200 por idempotencia.
 
 ## Fase 5: Seguridad y trazabilidad
-- [ ] T20 `SecurityConfig` (JWT HS256, permisos por endpoint) y perfil `local` sin seguridad.
-- [ ] T21 `UsuarioActualProvider` para obtener el usuario del token.
-- [ ] T22 `CorrelationIdFilter`, logs JSON y log de fin de petición.
-- [ ] T23 Pruebas: 401 sin token, 403 sin permiso, header `X-Correlation-Id` presente en la respuesta.
+- [x] T20 `SecurityConfig` (JWT HS256, permisos por endpoint) y perfil `local` sin seguridad.
+- [x] T21 `UsuarioActualProvider` para obtener el usuario del token.
+- [x] T22 `CorrelationIdFilter`, logs JSON y log de fin de petición.
+- [x] T23 Pruebas: 401 sin token, 403 sin permiso, header `X-Correlation-Id` presente en la respuesta.
 
 ## Fase 6: Verificación y entrega
 - [ ] T24 Prueba manual contra Oracle local: crear, consultar, cambiar estado válido e inválido, listar con filtros. Dejar los ejemplos `curl` en el README.

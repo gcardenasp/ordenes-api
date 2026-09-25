@@ -15,9 +15,11 @@ import com.empresa.ordenes.domain.exception.TransicionInvalidaException;
 import com.empresa.ordenes.domain.model.FiltroOrdenes;
 import com.empresa.ordenes.domain.model.Orden;
 import com.empresa.ordenes.domain.model.Pagina;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -68,6 +70,12 @@ class OrdenControllerTest {
     @BeforeEach
     void usuarioAutenticado() {
         when(usuarioActual.obtener()).thenReturn(USUARIO);
+    }
+
+    // Sin filtros no corre CorrelationIdFilter, que es quien limpia el MDC en cada petición
+    @AfterEach
+    void limpiarMdc() {
+        MDC.clear();
     }
 
     @Nested
