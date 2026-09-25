@@ -11,19 +11,23 @@ import com.empresa.ordenes.domain.exception.OrdenNoEncontradaException;
 import com.empresa.ordenes.domain.exception.TransicionInvalidaException;
 import com.empresa.ordenes.domain.model.FiltroOrdenes;
 import com.empresa.ordenes.domain.model.Orden;
-import com.empresa.ordenes.infrastructure.adapter.in.rest.UsuarioActualProvider;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.oracle.OracleContainer;
+import org.testcontainers.utility.MountableFile;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -32,12 +36,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Prueba contra el Oracle de docker-compose (perfil local). No corre con mvn verify:
- * ejecutar con mvn test -Dtest=OrdenRepositorioOracleIT
+ * Prueba contra un Oracle real en Docker, creado con los mismos scripts de database/ que usa
+ * docker-compose. Se ejecuta con: mvn verify -Pintegracion
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ActiveProfiles("local")
+@Testcontainers
 class OrdenRepositorioOracleIT {
+
+    @Container
+    static final OracleContainer ORACLE = new OracleContainer("gvenzl/oracle-free:23")
+            .withUsername("ordenes")
+            .withPassword("ordenes_it")
+            .withEnv("TZ", "America/Bogota")
+            .withCopyFileToContainer(MountableFile.forHostPath("database"), "/opt/ordenes/database")
+            .withCopyFileToContainer(MountableFile.forHostPath("docker/oracle/initdb/01_crear_esquema.sh", 0755),
+                    "/container-entrypoint-initdb.d/01_crear_esquema.sh")
+            .withStartupTimeout(Duration.ofMinutes(5));
+
+    @DynamicPropertySource
+    static void conexion(DynamicPropertyRegistry propiedades) {
+        propiedades.add("spring.datasource.url", ORACLE::getJdbcUrl);
+        propiedades.add("spring.datasource.username", ORACLE::getUsername);
+        propiedades.add("spring.datasource.password", ORACLE::getPassword);
+    }
 
     private static final String PREFIJO_LLAVE = "it-";
 
@@ -51,16 +72,6 @@ class OrdenRepositorioOracleIT {
     private JdbcClient jdbc;
     @Autowired
     private DataSource dataSource;
-
-    // La prueba entra por los casos de uso, no por HTTP: el usuario viaja en el comando
-    @MockitoBean
-    private UsuarioActualProvider usuarioActual;
-
-    @AfterEach
-    void limpiar() {
-        jdbc.sql("DELETE FROM orden_historico WHERE id_orden IN (SELECT id FROM orden WHERE llave_idempotencia LIKE 'it-%')").update();
-        jdbc.sql("DELETE FROM orden WHERE llave_idempotencia LIKE 'it-%'").update();
-    }
 
     @Test
     void creaLaOrdenConSuHistoricoInicialYRespetaLaIdempotencia() {
@@ -167,6 +178,30 @@ class OrdenRepositorioOracleIT {
     }
 
     @Test
+    void dosCambiosConcurrentesNuncaSalenDelMismoEstadoAnterior() throws Exception {
+        Orden orden = crearOrden.crear(comando(llaveNueva())).orden();
+        Long asignada = idEstado("ASIGNADA");
+
+        try (Connection otra = dataSource.getConnection()) {
+            otra.setAutoCommit(false);
+            try (var bloqueo = otra.prepareStatement("SELECT id FROM orden WHERE id = ? FOR UPDATE")) {
+                bloqueo.setLong(1, orden.id());
+                bloqueo.executeQuery();
+            }
+            // Las dos solicitudes quedan esperando el bloqueo y compiten cuando se libera
+            var primera = CompletableFuture.supplyAsync(() -> intentarCambio(orden.id(), asignada));
+            var segunda = CompletableFuture.supplyAsync(() -> intentarCambio(orden.id(), asignada));
+            Thread.sleep(1500);
+            otra.rollback();
+
+            assertThat(List.of(primera.get(10, TimeUnit.SECONDS), segunda.get(10, TimeUnit.SECONDS)))
+                    .containsExactlyInAnyOrder("OK", "TransicionInvalidaException");
+        }
+        assertThat(contar("SELECT COUNT(*) FROM orden_historico WHERE id_orden = ? AND id_estado_anterior = ?",
+                orden.id(), idEstado("CREADA"))).isEqualTo(1);
+    }
+
+    @Test
     void listaConFiltrosOrdenDescendenteYPaginacion() {
         Orden primera = crearOrden.crear(comando(llaveNueva())).orden();
         Orden segunda = crearOrden.crear(comando(llaveNueva())).orden();
@@ -185,6 +220,15 @@ class OrdenRepositorioOracleIT {
         assertThat(paginaDeUna.totalElementos()).isEqualTo(creadasHoy.totalElementos());
         assertThat(paginaDeUna.totalPaginas()).isEqualTo((int) creadasHoy.totalElementos());
         assertThat(deAyer.contenido()).extracting(Orden::id).doesNotContain(primera.id(), segunda.id(), tercera.id());
+    }
+
+    private String intentarCambio(Long idOrden, Long idEstadoNuevo) {
+        try {
+            cambiarEstado.cambiarEstado(cambio(idOrden, idEstadoNuevo));
+            return "OK";
+        } catch (RuntimeException e) {
+            return e.getClass().getSimpleName();
+        }
     }
 
     private CrearOrdenCommand comando(String llave) {

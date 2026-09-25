@@ -38,8 +38,8 @@ Ejecutar en orden. Al terminar cada fase: compilar, correr pruebas, marcar `[x]`
 - [x] T23 Pruebas: 401 sin token, 403 sin permiso, header `X-Correlation-Id` presente en la respuesta.
 
 ## Fase 6: Verificación y entrega
-- [ ] T24 Prueba manual contra Oracle local: crear, consultar, cambiar estado válido e inválido, listar con filtros. Dejar los ejemplos `curl` en el README.
-- [ ] T25 Prueba de concurrencia manual: dos cambios de estado simultáneos sobre la misma orden; verificar que el histórico es consistente.
-- [ ] T26 (Opcional) Prueba de integración con Testcontainers Oracle.
-- [ ] T27 README: descripción, arquitectura (enlazar diagramas), cómo levantar (Docker + Maven), perfil `local`, cómo generar un token de prueba, tabla de códigos de error, ruta de Swagger UI, supuestos.
-- [ ] T28 Revisión final contra `spec.md`: cada criterio de aceptación cumplido y dónde se prueba.
+- [x] T24 Prueba manual contra Oracle local: crear, consultar, cambiar estado válido e inválido, listar con filtros. Dejar los ejemplos `curl` en el README.
+- [x] T25 Prueba de concurrencia manual: dos cambios de estado simultáneos sobre la misma orden; verificar que el histórico es consistente.
+- [x] T26 (Opcional) Prueba de integración con Testcontainers Oracle.
+- [x] T27 README: descripción, arquitectura (enlazar diagramas), cómo levantar (Docker + Maven), perfil `local`, cómo generar un token de prueba, tabla de códigos de error, ruta de Swagger UI, supuestos.
+- [x] T28 Revisión final contra `spec.md`: cada criterio de aceptación cumplido y dónde se prueba.
