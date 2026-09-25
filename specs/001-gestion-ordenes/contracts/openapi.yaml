@@ -212,9 +212,11 @@ components:
           format: int64
         canal:
           type: string
+          minLength: 1
           maxLength: 30
         llaveIdempotencia:
           type: string
+          minLength: 1
           maxLength: 100
 
     ActualizarEstadoRequest:

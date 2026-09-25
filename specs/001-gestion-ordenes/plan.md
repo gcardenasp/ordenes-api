@@ -103,6 +103,8 @@ Reglas:
 | Validación de Bean Validation / parámetros | 400 | DATOS_INVALIDOS |
 | DatosInvalidosException | 400 | DATOS_INVALIDOS |
 | ReferenciaInexistenteException | 400 | REFERENCIA_INEXISTENTE |
+| Token ausente o inválido (Spring Security) | 401 | NO_AUTORIZADO |
+| Token sin el permiso de la acción (Spring Security) | 403 | ACCESO_DENEGADO |
 | OrdenNoEncontradaException | 404 | ORDEN_NO_ENCONTRADA |
 | OrdenBloqueadaException | 409 | ORDEN_BLOQUEADA |
 | TransicionInvalidaException | 422 | TRANSICION_INVALIDA |
