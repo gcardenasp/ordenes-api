@@ -14,9 +14,12 @@ CREATE OR REPLACE PROCEDURE prc_cambio_estado_orden (
     e_orden_no_existe     EXCEPTION;
     e_transicion_invalida EXCEPTION;
     e_orden_bloqueada     EXCEPTION;
+    e_recurso_ocupado     EXCEPTION;
 
-    -- Asocia el error de Oracle "recurso ocupado" (espera agotada) a nuestra excepcion
+    -- Asocia los errores de Oracle "recurso ocupado" (espera agotada) a nuestras excepciones:
+    -- -30006 es el clasico de FOR UPDATE WAIT; Oracle 23ai lanza -54 en su lugar
     PRAGMA EXCEPTION_INIT(e_orden_bloqueada, -30006);
+    PRAGMA EXCEPTION_INIT(e_recurso_ocupado, -54);
 BEGIN
     -- 1. Validar datos de entrada
     IF p_id_orden IS NULL OR p_id_estado_nuevo IS NULL OR p_usuario IS NULL THEN
@@ -75,7 +78,7 @@ EXCEPTION
     WHEN e_transicion_invalida THEN
         RAISE_APPLICATION_ERROR(-20003, 'Transicion no permitida del estado '
             || v_estado_actual || ' al estado ' || p_id_estado_nuevo);
-    WHEN e_orden_bloqueada THEN
+    WHEN e_orden_bloqueada OR e_recurso_ocupado THEN
         RAISE_APPLICATION_ERROR(-20004, 'La orden ' || p_id_orden
             || ' esta siendo actualizada por otra solicitud, intente nuevamente');
 END prc_cambio_estado_orden;

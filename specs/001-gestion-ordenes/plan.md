@@ -57,9 +57,9 @@ Reglas:
 2. Buscar por `llaveIdempotencia`; si existe, retornar la existente indicando que no es nueva (-> 200).
 3. Obtener el id del estado `CREADA` por código.
 4. Insertar ORDEN e insertar ORDEN_HISTORICO (estado anterior nulo) en la misma transacción.
-5. Si al insertar se viola la UNIQUE de la llave (carrera entre dos peticiones iguales), capturar la violación, releer por la llave y retornar la existente (-> 200). Para esto, el insert debe hacer flush dentro del adaptador para detectar la violación ahí.
-   - El adaptador inserta con `EntityManager.persist` + `EntityManager.flush()` directos, NO con `save()` de Spring Data: `save()` es `@Transactional` y, al fallar dentro de la transacción del caso de uso, la marca *rollback-only* y el commit terminaría en `UnexpectedRollbackException`.
-   - Oracle revierte solo la sentencia fallida (rollback a nivel de sentencia), así que la transacción sigue usable. Tras la violación se hace `EntityManager.clear()` (la entidad fallida queda en un estado inconsistente) y se relee por la llave; con READ COMMITTED la relectura ve la orden ya confirmada por la otra petición.
+5. Si al insertar se viola la UNIQUE de la llave (carrera entre dos peticiones iguales), capturar la violación, releer por la llave y retornar la existente (-> 200). La violación se detecta dentro del adaptador.
+   - El adaptador inserta ORDEN y su ORDEN_HISTORICO inicial con JDBC (`JdbcClient`), en la transacción del caso de uso, y relee la orden por JPA. JPA queda solo para lectura (`OrdenEntity` es `@Immutable`).
+   - Motivo (verificado contra Oracle en la Fase 3): si el insert falla dentro del `EntityManager` (con `save()` o con `persist` + `flush`), Hibernate marca la transacción *rollback-only* por la especificación JPA y el commit termina en `UnexpectedRollbackException`. Un error de JDBC no pasa por Hibernate: Oracle revierte solo la sentencia fallida (rollback a nivel de sentencia) y la transacción sigue usable; con READ COMMITTED la relectura ve la orden ya confirmada por la otra petición.
    - La violación se reconoce por el nombre de la restricción `UK_ORDEN_LLAVE_IDEMPOTENCIA` (ORA-00001); cualquier otra violación se propaga.
 6. Retornar 201 con la orden.
 
@@ -81,6 +81,7 @@ Reglas:
 - JPA y `SimpleJdbcCall` comparten la misma transacción mediante `JpaTransactionManager` (el que configura Spring Boot por defecto con JPA).
 - El procedimiento no hace COMMIT.
 - Aislamiento: READ COMMITTED (por defecto en Oracle). La concurrencia del cambio de estado la resuelve `SELECT ... FOR UPDATE WAIT 5` dentro del procedimiento.
+- La espera agotada se reporta como ORA-30006 o, en Oracle 23ai, como ORA-00054; el procedimiento traduce ambos a -20004 (cambio aprobado por el usuario en la Fase 3).
 
 ## Seguridad
 
