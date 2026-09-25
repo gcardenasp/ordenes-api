@@ -117,27 +117,19 @@ API=http://localhost:8080/api/v1
 TOKEN=$(python3 scripts/generar_token.py ana.perez)
 
 # Crear una orden: 201. Si se repite la llave de idempotencia: 200 con la misma orden
-curl -i -X POST $API/orden \
-  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -H 'X-Correlation-Id: demo-001' \
-  -d '{"idCliente":1,"idTipo":1,"canal":"WEB","llaveIdempotencia":"demo-orden-1"}'
+curl -i -X POST $API/orden -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -H 'X-Correlation-Id: demo-001' -d '{"idCliente":1,"idTipo":1,"canal":"WEB","llaveIdempotencia":"demo-orden-1"}'
 
 # Consultar: 200, o 404 si no existe
 curl -i $API/orden/1 -H "Authorization: Bearer $TOKEN"
 
 # Cambio de estado permitido (CREADA -> ASIGNADA): 200
-curl -i -X PUT $API/orden/1/estado \
-  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"idEstadoNuevo":2,"observacion":"Asignada a cuadrilla norte"}'
+curl -i -X PUT $API/orden/1/estado -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"idEstadoNuevo":2,"observacion":"Asignada a cuadrilla norte"}'
 
 # Cambio de estado no permitido (ASIGNADA -> FINALIZADA): 422
-curl -i -X PUT $API/orden/1/estado \
-  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"idEstadoNuevo":5}'
+curl -i -X PUT $API/orden/1/estado -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"idEstadoNuevo":5}'
 
 # Listar con filtros (todos opcionales, se combinan con AND)
-curl -i "$API/orden?estado=2&fechaInicio=2026-09-01&fechaFin=2026-09-30&pagina=0&tamano=10" \
-  -H "Authorization: Bearer $TOKEN"
+curl -i "$API/orden?estado=2&fechaInicio=2026-09-01&fechaFin=2026-09-30&pagina=0&tamano=10" -H "Authorization: Bearer $TOKEN"
 
 # Fechas invertidas: 400
 curl -i "$API/orden?fechaInicio=2026-09-30&fechaFin=2026-09-01" -H "Authorization: Bearer $TOKEN"
